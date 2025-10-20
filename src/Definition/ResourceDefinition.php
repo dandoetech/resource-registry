@@ -7,10 +7,10 @@ namespace DanDoeTech\ResourceRegistry\Definition;
 final class ResourceDefinition
 {
     /**
-     * @param non-empty-string $key
-     * @param list<FieldDefinition> $fields
+     * @param non-empty-string         $key
+     * @param list<FieldDefinition>    $fields
      * @param list<RelationDefinition> $relations
-     * @param list<ActionDefinition> $actions
+     * @param list<ActionDefinition>   $actions
      */
     public function __construct(
         public string  $key,
@@ -19,7 +19,6 @@ final class ResourceDefinition
         public array   $relations = [],
         public array   $actions = [],
         public ?string $description = null,
-    )
-    {
+    ) {
     }
 }

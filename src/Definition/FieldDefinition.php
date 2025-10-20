@@ -14,7 +14,6 @@ final class FieldDefinition
         public array     $rules = [],
         public ?string   $label = null,
         public ?string   $description = null,
-    )
-    {
+    ) {
     }
 }

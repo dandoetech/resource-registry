@@ -13,7 +13,6 @@ final class RelationDefinition
         public string       $target,
         public ?string      $label = null,
         public ?string      $description = null,
-    )
-    {
+    ) {
     }
 }
