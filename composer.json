@@ -1,6 +1,6 @@
 {
-  "name": "dandoetech/package-skeleton",
-  "description": "A modern PHP package skeleton with CI, QA, and quality reporting (Codacy + SonarCloud).",
+  "name": "dandoetech/resource-registry",
+  "description": "Framework-agnostic Resource Registry for API resources (fields, relations, actions, policies).",
   "type": "library",
   "license": "MIT",
   "authors": [
@@ -14,12 +14,12 @@
   },
   "autoload": {
     "psr-4": {
-      "DanDoeTech\\PackageSkeleton\\": "src/"
+      "DanDoeTech\\ResourceRegistry\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "DanDoeTech\\PackageSkeleton\\Tests\\": "tests/"
+      "DanDoeTech\\ResourceRegistry\\Tests\\": "tests/"
     }
   },
   "require-dev": {

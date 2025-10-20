@@ -1,59 +1,174 @@
-# DanDoeTech PackageSkeleton
+# DanDoeTech ResourceRegistry
 
-> A modern PHP package skeleton with CI, QA and quality reporting — ready for Packagist.
+> **Framework-agnostic metadata layer** for describing API resources, fields, relations, actions, and policies —
+> the single **source of truth** for your domain contracts across REST, OpenAPI, and BFF layers.
 
-![Build](https://github.com/dandoetech/package-skeleton/actions/workflows/tests.yml/badge.svg)
-![Static Analysis](https://github.com/dandoetech/package-skeleton/actions/workflows/static-analysis.yml/badge.svg)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/b7ccf297da214db5a81604b88ae0e704)](https://app.codacy.com?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/b7ccf297da214db5a81604b88ae0e704)](https://app.codacy.com?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dandoetech_package-skeleton&metric=alert_status&token=0f6e812685c39ef11dcfff8b33a14c0c529a6fe1)](https://sonarcloud.io/summary/new_code?id=dandoetech_package-skeleton)
+![Tests](https://github.com/dandoetech/resource-registry/actions/workflows/tests.yml/badge.svg)
+![Static Analysis](https://github.com/dandoetech/resource-registry/actions/workflows/static-analysis.yml/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## Install
+## Purpose
 
-```bash
-composer require dandoetech/package-skeleton
-```
+Modern backends suffer from duplication: models define schema, controllers define validation, OpenAPI specs repeat them,
+and frontends duplicate field definitions again. **`resource-registry`** centralizes all this information into a single,
+typed, framework-independent **Resource Definition Model** that is consumable by API generators, OpenAPI generators,
+and BFF metadata providers.
 
-## Usage
+**Define your resource once — and every layer knows how to use it.**
+
+## Design Principles
+
+- **Framework-agnostic**: Works standalone, no Laravel dependency.
+- **Typed contracts**: PHP 8.2+ enums and value objects for safe metadata.
+- **Extensible drivers**: Array/config driver now, DB or code-introspection drivers later.
+- **Composable layers**: Consumers (API, OpenAPI, BFF) depend on contracts, not implementation.
+- **Declarative > imperative**: Define *what* a resource is, not *how* it behaves at runtime.
+
+## Example: Defining Resources
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-use DanDoeTech\PackageSkeleton\Example;
+use DanDoeTech\ResourceRegistry\Definition\{
+    FieldDefinition, FieldType, RelationDefinition, RelationType, ActionDefinition
+};
 
-$ex = new Example();
-echo $ex->greet('World'); // Hello, World!
+return [
+    'product' => [
+        'label' => 'Product',
+        'fields' => [
+            new FieldDefinition('id', FieldType::Integer, false),
+            new FieldDefinition('name', FieldType::String, false, ['required', 'max:120']),
+            new FieldDefinition('price', FieldType::Float, false, ['min:0']),
+            new FieldDefinition('created_at', FieldType::DateTime, false),
+        ],
+        'relations' => [
+            new RelationDefinition('category', RelationType::BelongsTo, 'category'),
+        ],
+        'actions' => [
+            new ActionDefinition('create'),
+            new ActionDefinition('update'),
+        ],
+    ],
+
+    'category' => [
+        'label' => 'Category',
+        'fields' => [
+            new FieldDefinition('id', FieldType::Integer, false),
+            new FieldDefinition('name', FieldType::String, false, ['required']),
+        ],
+        'relations' => [
+            new RelationDefinition('products', RelationType::HasMany, 'product'),
+        ],
+        'actions' => [
+            new ActionDefinition('create'),
+        ],
+    ],
+];
 ```
 
-## Development
+## Usage
+
+```php
+use DanDoeTech\ResourceRegistry\Registry\ArrayRegistryDriver;
+use DanDoeTech\ResourceRegistry\Registry\Registry;
+
+$config = require __DIR__.'/config/resources.php';
+
+$driver = new ArrayRegistryDriver($config);
+$registry = new Registry($driver);
+
+$product = $registry->getResource('product'); // ResourceDefinition
+foreach ($registry->all() as $resource) {
+    echo $resource->label . PHP_EOL;
+}
+```
+
+## When to Use
+
+- Generate **consistent REST APIs** automatically
+- Produce **OpenAPI/Swagger specs** from typed metadata
+- Feed **frontend apps (Vue, React, etc.)** with **BFF metadata**
+- Avoid repeating the same field/validation/relation definitions across layers
+- Share **resource contracts** between multiple services
+
+## What It Is *Not*
+
+- ❌ Not an ORM or a replacement for Eloquent
+- ❌ Not a data runtime or query layer
+- ✅ It’s **metadata**, not **data**
+
+## Architecture (DDD-style)
+
+```
+App (Laravel/Symfony)
+        |
+        v
+ Resource Registry  ←  this package
+        |
+        v
++---------------+---------------+---------------+
+|  Generic API  |  OpenAPI Doc  |  BFF Metadata |
++---------------+---------------+---------------+
+```
+
+## API Overview
+
+| Class                        | Description                                          |
+|------------------------------|------------------------------------------------------|
+| `Registry`                   | Central access point for resources                   |
+| `RegistryDriverInterface`    | Contract for any driver providing metadata           |
+| `ArrayRegistryDriver`        | Simple implementation using PHP arrays               |
+| `ResourceDefinition`         | Describes a resource with fields, relations, actions |
+| `FieldDefinition`            | Describes an individual field                        |
+| `RelationDefinition`         | Describes a relation to another resource             |
+| `ActionDefinition`           | Describes available actions (create, update, etc.)   |
+| `FieldType` / `RelationType` | Enums for consistent type usage                      |
+
+## Extending It
+
+Implement a custom driver:
+
+```php
+use DanDoeTech\ResourceRegistry\Contracts\RegistryDriverInterface;
+use DanDoeTech\ResourceRegistry\Definition\ResourceDefinition;
+
+final class DatabaseRegistryDriver implements RegistryDriverInterface
+{
+    /** @return list<ResourceDefinition> */
+    public function all(): array { /* ... */ }
+
+    public function find(string $key): ?ResourceDefinition { /* ... */ }
+}
+```
+
+## Installation
+
+```bash
+composer require dandoetech/resource-registry
+```
+
+## Testing
 
 ```bash
 composer install
-composer qa         # runs cs:check, phpstan, tests
-composer cs:fix     # auto-fix coding style
-composer test       # run test suite
-composer test:coverage
+composer test
 ```
 
-## Quality Gates
+## Roadmap
 
-- PSR-12 via PHP-CS-Fixer (with strict types, imports, trailing commas)
-- PHPStan level `max`
-- PHPUnit 11 with coverage (Clover + HTML)
-- GitHub Actions: tests (PHP 8.2 / 8.3 / 8.4 / 8.5), static analysis, cache
-- **Codacy** coverage upload (needs `CODACY_PROJECT_TOKEN` secret)
-- **SonarCloud** analysis (needs `SONAR_TOKEN` secret)
+- [ ] Policy/permission metadata
+- [ ] JSON Schema export
+- [ ] Laravel bridge (service provider + config publish)
+- [ ] CLI for registry validation and schema export
 
-## Releasing
+## Ecosystem
 
-- Create a tag like `v0.1.0`
-- Push to GitHub — Packagist auto-updates if hooked, or submit manually
+This package is part of the **dandoetech** open-source ecosystem — a modular set of libraries enabling
+contract-driven backends: **Resource Registry → OpenAPI → Generic API → BFF metadata**.
 
-## Rename This Skeleton
+## License
 
-- Replace vendor & package in `composer.json` (`dandoetech/package-skeleton`)
-- Replace namespace `DanDoeTech\PackageSkeleton\` in `/src` and `/tests`
-- Search/replace badges in `README.md`
-- Optional: adjust `LICENSE` owner
+MIT © Danilo Doelle <oss@dandoe.tech>

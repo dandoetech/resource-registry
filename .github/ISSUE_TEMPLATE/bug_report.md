@@ -13,6 +13,7 @@ Steps to reproduce the behavior.
 What you expected to happen.
 
 **Environment**
+
 - PHP version:
 - Package version:
 - OS:
