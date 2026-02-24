@@ -276,6 +276,9 @@ final class ResourceBuilder
         );
     }
 
+    /**
+     * @param array<string, mixed> $meta
+     */
     public function computed(
         string $name,
         FieldType $type,
@@ -283,6 +286,7 @@ final class ResourceBuilder
         ?string $resolver = null,
         ?string $label = null,
         ?string $description = null,
+        array $meta = [],
     ): self {
         $this->computedFields[] = new ComputedFieldDefinition(
             name: $name,
@@ -291,6 +295,7 @@ final class ResourceBuilder
             resolver: $resolver,
             label: $label,
             description: $description,
+            meta: $meta,
         );
 
         return $this;

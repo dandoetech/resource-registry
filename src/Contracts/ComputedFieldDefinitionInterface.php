@@ -21,4 +21,7 @@ interface ComputedFieldDefinitionInterface
     public function getLabel(): ?string;
 
     public function getDescription(): ?string;
+
+    /** @return array<string, mixed> */
+    public function getMeta(): array;
 }

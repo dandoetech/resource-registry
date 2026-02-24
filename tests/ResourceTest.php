@@ -147,6 +147,7 @@ final class ResourceTest extends TestCase
         self::assertSame(FieldType::String, $categoryName->getType());
         self::assertSame('category.name', $categoryName->getVia());
         self::assertNull($categoryName->getResolver());
+        self::assertSame([], $categoryName->getMeta());
 
         $ordersCount = $resource->getComputedFields()[1];
         self::assertSame('orders_count', $ordersCount->getName());

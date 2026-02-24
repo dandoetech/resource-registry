@@ -104,6 +104,7 @@ final class ResourceBuilderTest extends TestCase
         self::assertSame(FieldType::String, $categoryName->getType());
         self::assertSame('category.name', $categoryName->getVia());
         self::assertNull($categoryName->getResolver());
+        self::assertSame([], $categoryName->getMeta());
 
         $ordersCount = $resource->getComputedFields()[1];
         self::assertSame('orders_count', $ordersCount->getName());
@@ -286,6 +287,7 @@ final class ResourceBuilderTest extends TestCase
                 resolver: 'App\\Resolvers\\ProductRevenue',
                 label: 'Total Revenue',
                 description: 'Sum of all order line totals',
+                meta: ['currency' => 'EUR'],
             )
             ->build();
 
@@ -297,6 +299,7 @@ final class ResourceBuilderTest extends TestCase
         self::assertSame('App\\Resolvers\\ProductRevenue', $computed->getResolver());
         self::assertSame('Total Revenue', $computed->getLabel());
         self::assertSame('Sum of all order line totals', $computed->getDescription());
+        self::assertSame(['currency' => 'EUR'], $computed->getMeta());
     }
 
     public function testActionWithDescriptionAndMeta(): void

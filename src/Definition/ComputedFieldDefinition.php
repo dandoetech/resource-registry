@@ -8,6 +8,9 @@ use DanDoeTech\ResourceRegistry\Contracts\ComputedFieldDefinitionInterface;
 
 final class ComputedFieldDefinition implements ComputedFieldDefinitionInterface
 {
+    /**
+     * @param array<string, mixed> $meta
+     */
     public function __construct(
         public string    $name,
         public FieldType $type,
@@ -17,6 +20,7 @@ final class ComputedFieldDefinition implements ComputedFieldDefinitionInterface
         public ?string   $resolver = null,
         public ?string   $label = null,
         public ?string   $description = null,
+        public array     $meta = [],
     ) {
     }
 
@@ -48,5 +52,11 @@ final class ComputedFieldDefinition implements ComputedFieldDefinitionInterface
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    /** @return array<string, mixed> */
+    public function getMeta(): array
+    {
+        return $this->meta;
     }
 }

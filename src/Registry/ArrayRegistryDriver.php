@@ -286,6 +286,7 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
             resolver: \is_string($c['resolver'] ?? null) ? $c['resolver'] : null,
             label: \is_string($c['label'] ?? null) ? $c['label'] : null,
             description: \is_string($c['description'] ?? null) ? $c['description'] : null,
+            meta: $this->toStringKeyedArray($c['meta'] ?? []),
         );
     }
 
