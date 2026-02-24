@@ -9,7 +9,7 @@ use DanDoeTech\ResourceRegistry\Contracts\FieldDefinitionInterface;
 final class FieldDefinition implements FieldDefinitionInterface
 {
     /**
-     * @param list<string>        $rules
+     * @param list<string>         $rules
      * @param array<string, mixed> $meta
      */
     public function __construct(

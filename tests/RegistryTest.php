@@ -18,14 +18,14 @@ final class RegistryTest extends TestCase
 
         $product = $registry->getResource('product');
         self::assertNotNull($product);
-        self::assertSame('Product', $product->label);
-        self::assertCount(4, $product->fields);
-        self::assertSame('name', $product->fields[1]->name);
-        self::assertSame(FieldType::String, $product->fields[1]->type);
+        self::assertSame('Product', $product->getLabel());
+        self::assertCount(4, $product->getFields());
+        self::assertSame('name', $product->getFields()[1]->getName());
+        self::assertSame(FieldType::String, $product->getFields()[1]->getType());
 
         $category = $registry->getResource('category');
         self::assertNotNull($category);
-        self::assertCount(2, $category->fields);
+        self::assertCount(2, $category->getFields());
 
         self::assertCount(2, $registry->all());
     }

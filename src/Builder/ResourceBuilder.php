@@ -352,7 +352,7 @@ final class ResourceBuilder
 
         return new ResourceDefinition(
             key: $this->key,
-            label: $this->label ?? ucfirst($this->key),
+            label: $this->label ?? \ucwords(\str_replace('_', ' ', $this->key)),
             fields: $this->fields,
             relations: $this->relations,
             actions: $this->actions,

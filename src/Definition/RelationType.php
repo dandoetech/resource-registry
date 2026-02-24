@@ -12,7 +12,6 @@ enum RelationType: string
     case BelongsToMany = 'belongs_to_many';
     case HasManyThrough = 'has_many_through';
     case HasOneThrough = 'has_one_through';
-    case ManyToMany = 'many_to_many';
     case MorphTo = 'morph_to';
     case MorphMany = 'morph_many';
 }

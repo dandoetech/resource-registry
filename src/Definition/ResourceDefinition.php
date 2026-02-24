@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace DanDoeTech\ResourceRegistry\Definition;
 
+use DanDoeTech\ResourceRegistry\Contracts\ActionDefinitionInterface;
 use DanDoeTech\ResourceRegistry\Contracts\ComputedFieldDefinitionInterface;
 use DanDoeTech\ResourceRegistry\Contracts\FieldDefinitionInterface;
+use DanDoeTech\ResourceRegistry\Contracts\RelationDefinitionInterface;
 use DanDoeTech\ResourceRegistry\Contracts\ResourceDefinitionInterface;
 
 final class ResourceDefinition implements ResourceDefinitionInterface
 {
     /**
-     * @param non-empty-string                  $key
-     * @param list<FieldDefinition>             $fields
-     * @param list<RelationDefinition>          $relations
-     * @param list<ActionDefinition>            $actions
-     * @param list<ComputedFieldDefinition>     $computedFields
-     * @param list<string>                      $filterable
-     * @param list<string>                      $sortable
-     * @param list<string>                      $searchable
-     * @param array<string, mixed>              $meta
+     * @param non-empty-string              $key
+     * @param list<FieldDefinition>         $fields
+     * @param list<RelationDefinition>      $relations
+     * @param list<ActionDefinition>        $actions
+     * @param list<ComputedFieldDefinition> $computedFields
+     * @param list<string>                  $filterable
+     * @param list<string>                  $sortable
+     * @param list<string>                  $searchable
+     * @param array<string, mixed>          $meta
      */
     public function __construct(
         public string  $key,
@@ -71,13 +73,13 @@ final class ResourceDefinition implements ResourceDefinitionInterface
         return null;
     }
 
-    /** @return list<RelationDefinition> */
+    /** @return list<RelationDefinitionInterface> */
     public function getRelations(): array
     {
         return $this->relations;
     }
 
-    /** @return list<ActionDefinition> */
+    /** @return list<ActionDefinitionInterface> */
     public function getActions(): array
     {
         return $this->actions;

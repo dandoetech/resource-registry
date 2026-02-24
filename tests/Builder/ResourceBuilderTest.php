@@ -313,13 +313,13 @@ final class ResourceBuilderTest extends TestCase
         self::assertSame(['confirm' => true], $action->getMeta());
     }
 
-    public function testLabelDefaultsToUcfirstKey(): void
+    public function testLabelDefaultsToUcwordsKey(): void
     {
         $resource = (new ResourceBuilder())
             ->key('order_item')
             ->build();
 
-        self::assertSame('Order_item', $resource->getLabel());
+        self::assertSame('Order Item', $resource->getLabel());
     }
 
     public function testBuildThrowsWithoutKey(): void

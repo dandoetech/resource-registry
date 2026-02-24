@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace DanDoeTech\ResourceRegistry\Registry;
 
 use DanDoeTech\ResourceRegistry\Contracts\RegistryDriverInterface;
-use DanDoeTech\ResourceRegistry\Definition\ResourceDefinition;
+use DanDoeTech\ResourceRegistry\Contracts\ResourceDefinitionInterface;
 
 final readonly class Registry
 {
@@ -13,13 +13,13 @@ final readonly class Registry
     {
     }
 
-    /** @return list<ResourceDefinition> */
+    /** @return list<ResourceDefinitionInterface> */
     public function all(): array
     {
         return $this->driver->all();
     }
 
-    public function getResource(string $key): ?ResourceDefinition
+    public function getResource(string $key): ?ResourceDefinitionInterface
     {
         return $this->driver->find($key);
     }
