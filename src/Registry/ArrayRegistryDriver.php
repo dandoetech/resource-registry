@@ -26,7 +26,7 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
     {
         $out = [];
         foreach ($this->config as $key => $item) {
-            $out[] = $this->hydrate((string) $key, $item);
+            $out[] = $this->hydrate($key, $item);
         }
 
         return $out;
@@ -34,25 +34,34 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
 
     public function find(string $key): ?ResourceDefinitionInterface
     {
-        /** @var array<string, mixed>|null $item */
-        $item = $this->config[$key] ?? null;
+        if (!isset($this->config[$key])) {
+            return null;
+        }
 
-        return $item === null ? null : $this->hydrate($key, $item);
+        return $this->hydrate($key, $this->config[$key]);
     }
 
     /** @param array<string, mixed> $item */
     private function hydrate(string $key, array $item): ResourceDefinition
     {
+        if ($key === '') {
+            throw new \InvalidArgumentException('Resource key must not be empty');
+        }
+
+        $label = \is_string($item['label'] ?? null) ? $item['label'] : \ucwords(\str_replace('_', ' ', $key));
+        $description = \is_string($item['description'] ?? null) ? $item['description'] : null;
+        $version = \is_int($item['version'] ?? null) ? $item['version'] : 1;
+
         return new ResourceDefinition(
             key: $key,
-            label: (string) ($item['label'] ?? \ucwords(\str_replace('_', ' ', $key))),
+            label: $label,
             fields: $this->hydrateFields($item),
             relations: $this->hydrateRelations($item),
             actions: $this->hydrateActions($item),
-            description: isset($item['description']) ? (string) $item['description'] : null,
-            version: (int) ($item['version'] ?? 1),
-            timestamps: (bool) ($item['timestamps'] ?? false),
-            softDeletes: (bool) ($item['softDeletes'] ?? false),
+            description: $description,
+            version: $version,
+            timestamps: !empty($item['timestamps']),
+            softDeletes: !empty($item['softDeletes']),
             computedFields: $this->hydrateComputedFields($item),
             filterable: $this->toStringList($item['filterable'] ?? []),
             sortable: $this->toStringList($item['sortable'] ?? []),
@@ -68,9 +77,14 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
      */
     private function hydrateFields(array $item): array
     {
+        $raw = $item['fields'] ?? [];
+        if (!\is_array($raw)) {
+            return [];
+        }
+
         $fields = [];
-        /** @var mixed $f */
-        foreach ($item['fields'] ?? [] as $f) {
+
+        foreach ($raw as $f) {
             if ($f instanceof FieldDefinition) {
                 $fields[] = $f;
 
@@ -79,22 +93,39 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
             if (!\is_array($f)) {
                 throw new \InvalidArgumentException('Each field entry must be a FieldDefinition or array');
             }
-            $fields[] = new FieldDefinition(
-                name: (string) ($f['name'] ?? throw new \InvalidArgumentException('field.name required')),
-                type: $f['type'] instanceof FieldType ? $f['type'] : FieldType::from((string) $f['type']),
-                nullable: (bool) ($f['nullable'] ?? true),
-                rules: $this->toStringList($f['rules'] ?? []),
-                label: isset($f['label']) ? (string) $f['label'] : null,
-                description: isset($f['description']) ? (string) $f['description'] : null,
-                unique: (bool) ($f['unique'] ?? false),
-                indexed: (bool) ($f['indexed'] ?? false),
-                default: $f['default'] ?? null,
-                comment: isset($f['comment']) ? (string) $f['comment'] : null,
-                meta: $this->toStringKeyedArray($f['meta'] ?? []),
-            );
+            /** @var array<string, mixed> $f */
+            $fields[] = $this->hydrateField($f);
         }
 
         return $fields;
+    }
+
+    /**
+     * @param array<string, mixed> $f
+     */
+    private function hydrateField(array $f): FieldDefinition
+    {
+        $name = $f['name'] ?? null;
+        if (!\is_string($name) || $name === '') {
+            throw new \InvalidArgumentException('field.name required');
+        }
+
+        $type = $f['type'] ?? null;
+        $fieldType = $type instanceof FieldType ? $type : FieldType::from(\is_string($type) ? $type : '');
+
+        return new FieldDefinition(
+            name: $name,
+            type: $fieldType,
+            nullable: !empty($f['nullable'] ?? true),
+            rules: $this->toStringList($f['rules'] ?? []),
+            label: \is_string($f['label'] ?? null) ? $f['label'] : null,
+            description: \is_string($f['description'] ?? null) ? $f['description'] : null,
+            unique: !empty($f['unique']),
+            indexed: !empty($f['indexed']),
+            default: $f['default'] ?? null,
+            comment: \is_string($f['comment'] ?? null) ? $f['comment'] : null,
+            meta: $this->toStringKeyedArray($f['meta'] ?? []),
+        );
     }
 
     /**
@@ -104,9 +135,14 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
      */
     private function hydrateRelations(array $item): array
     {
+        $raw = $item['relations'] ?? [];
+        if (!\is_array($raw)) {
+            return [];
+        }
+
         $relations = [];
-        /** @var mixed $r */
-        foreach ($item['relations'] ?? [] as $r) {
+
+        foreach ($raw as $r) {
             if ($r instanceof RelationDefinition) {
                 $relations[] = $r;
 
@@ -115,20 +151,42 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
             if (!\is_array($r)) {
                 throw new \InvalidArgumentException('Each relation entry must be a RelationDefinition or array');
             }
-            $relations[] = new RelationDefinition(
-                name: (string) ($r['name'] ?? throw new \InvalidArgumentException('relation.name required')),
-                type: $r['type'] instanceof RelationType ? $r['type'] : RelationType::from((string) $r['type']),
-                target: (string) ($r['target'] ?? throw new \InvalidArgumentException('relation.target required')),
-                label: isset($r['label']) ? (string) $r['label'] : null,
-                description: isset($r['description']) ? (string) $r['description'] : null,
-                foreignKey: isset($r['foreignKey']) ? (string) $r['foreignKey'] : null,
-                relatedKey: isset($r['relatedKey']) ? (string) $r['relatedKey'] : null,
-                pivotTable: isset($r['pivotTable']) ? (string) $r['pivotTable'] : null,
-                meta: $this->toStringKeyedArray($r['meta'] ?? []),
-            );
+            /** @var array<string, mixed> $r */
+            $relations[] = $this->hydrateRelation($r);
         }
 
         return $relations;
+    }
+
+    /**
+     * @param array<string, mixed> $r
+     */
+    private function hydrateRelation(array $r): RelationDefinition
+    {
+        $name = $r['name'] ?? null;
+        if (!\is_string($name) || $name === '') {
+            throw new \InvalidArgumentException('relation.name required');
+        }
+
+        $type = $r['type'] ?? null;
+        $relationType = $type instanceof RelationType ? $type : RelationType::from(\is_string($type) ? $type : '');
+
+        $target = $r['target'] ?? null;
+        if (!\is_string($target) || $target === '') {
+            throw new \InvalidArgumentException('relation.target required');
+        }
+
+        return new RelationDefinition(
+            name: $name,
+            type: $relationType,
+            target: $target,
+            label: \is_string($r['label'] ?? null) ? $r['label'] : null,
+            description: \is_string($r['description'] ?? null) ? $r['description'] : null,
+            foreignKey: \is_string($r['foreignKey'] ?? null) ? $r['foreignKey'] : null,
+            relatedKey: \is_string($r['relatedKey'] ?? null) ? $r['relatedKey'] : null,
+            pivotTable: \is_string($r['pivotTable'] ?? null) ? $r['pivotTable'] : null,
+            meta: $this->toStringKeyedArray($r['meta'] ?? []),
+        );
     }
 
     /**
@@ -138,9 +196,14 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
      */
     private function hydrateActions(array $item): array
     {
+        $raw = $item['actions'] ?? [];
+        if (!\is_array($raw)) {
+            return [];
+        }
+
         $actions = [];
-        /** @var mixed $a */
-        foreach ($item['actions'] ?? [] as $a) {
+
+        foreach ($raw as $a) {
             if ($a instanceof ActionDefinition) {
                 $actions[] = $a;
 
@@ -149,14 +212,28 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
             if (!\is_array($a)) {
                 throw new \InvalidArgumentException('Each action entry must be an ActionDefinition or array');
             }
-            $actions[] = new ActionDefinition(
-                name: (string) ($a['name'] ?? throw new \InvalidArgumentException('action.name required')),
-                description: isset($a['description']) ? (string) $a['description'] : null,
-                meta: $this->toStringKeyedArray($a['meta'] ?? []),
-            );
+            /** @var array<string, mixed> $a */
+            $actions[] = $this->hydrateAction($a);
         }
 
         return $actions;
+    }
+
+    /**
+     * @param array<string, mixed> $a
+     */
+    private function hydrateAction(array $a): ActionDefinition
+    {
+        $name = $a['name'] ?? null;
+        if (!\is_string($name) || $name === '') {
+            throw new \InvalidArgumentException('action.name required');
+        }
+
+        return new ActionDefinition(
+            name: $name,
+            description: \is_string($a['description'] ?? null) ? $a['description'] : null,
+            meta: $this->toStringKeyedArray($a['meta'] ?? []),
+        );
     }
 
     /**
@@ -166,9 +243,14 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
      */
     private function hydrateComputedFields(array $item): array
     {
+        $raw = $item['computedFields'] ?? [];
+        if (!\is_array($raw)) {
+            return [];
+        }
+
         $computed = [];
-        /** @var mixed $c */
-        foreach ($item['computedFields'] ?? [] as $c) {
+
+        foreach ($raw as $c) {
             if ($c instanceof ComputedFieldDefinition) {
                 $computed[] = $c;
 
@@ -177,22 +259,37 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
             if (!\is_array($c)) {
                 throw new \InvalidArgumentException('Each computedField entry must be a ComputedFieldDefinition or array');
             }
-            $computed[] = new ComputedFieldDefinition(
-                name: (string) ($c['name'] ?? throw new \InvalidArgumentException('computedField.name required')),
-                type: $c['type'] instanceof FieldType ? $c['type'] : FieldType::from((string) $c['type']),
-                via: isset($c['via']) ? (string) $c['via'] : null,
-                resolver: isset($c['resolver']) ? (string) $c['resolver'] : null,
-                label: isset($c['label']) ? (string) $c['label'] : null,
-                description: isset($c['description']) ? (string) $c['description'] : null,
-            );
+            /** @var array<string, mixed> $c */
+            $computed[] = $this->hydrateComputedField($c);
         }
 
         return $computed;
     }
 
     /**
-     * @param mixed $value
-     *
+     * @param array<string, mixed> $c
+     */
+    private function hydrateComputedField(array $c): ComputedFieldDefinition
+    {
+        $name = $c['name'] ?? null;
+        if (!\is_string($name) || $name === '') {
+            throw new \InvalidArgumentException('computedField.name required');
+        }
+
+        $type = $c['type'] ?? null;
+        $fieldType = $type instanceof FieldType ? $type : FieldType::from(\is_string($type) ? $type : '');
+
+        return new ComputedFieldDefinition(
+            name: $name,
+            type: $fieldType,
+            via: \is_string($c['via'] ?? null) ? $c['via'] : null,
+            resolver: \is_string($c['resolver'] ?? null) ? $c['resolver'] : null,
+            label: \is_string($c['label'] ?? null) ? $c['label'] : null,
+            description: \is_string($c['description'] ?? null) ? $c['description'] : null,
+        );
+    }
+
+    /**
      * @return list<string>
      */
     private function toStringList(mixed $value): array
@@ -201,12 +298,16 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
             return [];
         }
 
-        return \array_values(\array_map('strval', $value));
+        $result = [];
+
+        foreach ($value as $item) {
+            $result[] = \is_string($item) ? $item : (string) (\is_scalar($item) ? $item : '');
+        }
+
+        return $result;
     }
 
     /**
-     * @param mixed $value
-     *
      * @return array<string, mixed>
      */
     private function toStringKeyedArray(mixed $value): array

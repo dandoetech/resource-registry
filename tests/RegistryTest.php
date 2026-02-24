@@ -13,6 +13,7 @@ final class RegistryTest extends TestCase
 {
     public function testLoadsResourcesFromArrayConfig(): void
     {
+        /** @var array<string, array<string, mixed>> $config */
         $config = require __DIR__ . '/../examples/config/resources.php';
         $registry = new Registry(new ArrayRegistryDriver($config));
 
