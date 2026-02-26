@@ -9,6 +9,8 @@
       "email": "oss@dandoe.tech"
     }
   ],
+  "homepage": "https://github.com/dandoe-tech/resource-registry",
+  "keywords": ["php", "resource", "registry", "api", "metadata", "crud"],
   "require": {
     "php": "^8.2 || ^8.3 || ^8.4"
   },
@@ -38,7 +40,5 @@
       "@stan",
       "@test"
     ]
-  },
-  "minimum-stability": "stable",
-  "prefer-stable": true
+  }
 }
