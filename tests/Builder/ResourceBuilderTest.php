@@ -46,7 +46,7 @@ final class ResourceBuilderTest extends TestCase
             ->softDeletes()
             ->field('name', FieldType::String, nullable: false, rules: ['required', 'max:120'])
             ->field('price', FieldType::Float, nullable: false, rules: ['min:0'])
-            ->field('description', FieldType::String, label: 'Beschreibung')
+            ->field('description', FieldType::String, label: 'Description')
             ->field('category_id', FieldType::Integer, nullable: false)
             ->belongsTo('category', foreignKey: 'category_id')
             ->hasMany('reviews')
@@ -80,7 +80,7 @@ final class ResourceBuilderTest extends TestCase
 
         $descField = $resource->getField('description');
         self::assertNotNull($descField);
-        self::assertSame('Beschreibung', $descField->getLabel());
+        self::assertSame('Description', $descField->getLabel());
 
         self::assertNull($resource->getField('nonexistent'));
 

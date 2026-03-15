@@ -9,10 +9,10 @@
       "email": "oss@dandoe.tech"
     }
   ],
-  "homepage": "https://github.com/dandoe-tech/resource-registry",
+  "homepage": "https://github.com/dandoetech/resource-registry",
   "keywords": ["php", "resource", "registry", "api", "metadata", "crud"],
   "require": {
-    "php": "^8.2 || ^8.3 || ^8.4"
+    "php": "^8.2"
   },
   "autoload": {
     "psr-4": {
