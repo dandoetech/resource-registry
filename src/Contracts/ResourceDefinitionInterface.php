@@ -43,4 +43,6 @@ interface ResourceDefinitionInterface
 
     /** @return array<string, mixed> */
     public function getMeta(): array;
+
+    public function getRouteSegment(): ?string;
 }

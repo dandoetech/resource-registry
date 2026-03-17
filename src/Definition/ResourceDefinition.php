@@ -38,6 +38,7 @@ final class ResourceDefinition implements ResourceDefinitionInterface
         public array   $sortable = [],
         public array   $searchable = [],
         public array   $meta = [],
+        public ?string $routeSegment = null,
     ) {
     }
 
@@ -128,5 +129,10 @@ final class ResourceDefinition implements ResourceDefinitionInterface
     public function getMeta(): array
     {
         return $this->meta;
+    }
+
+    public function getRouteSegment(): ?string
+    {
+        return $this->routeSegment;
     }
 }

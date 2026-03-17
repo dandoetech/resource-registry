@@ -33,6 +33,7 @@ final class ResourceBuilderTest extends TestCase
         self::assertSame([], $resource->getSearchable());
         self::assertNull($resource->getDescription());
         self::assertSame([], $resource->getMeta());
+        self::assertNull($resource->getRouteSegment());
     }
 
     public function testBuildFullProductResource(): void
@@ -395,5 +396,6 @@ final class ResourceBuilderTest extends TestCase
         self::assertSame($builder, $builder->searchable(['a']));
         self::assertSame($builder, $builder->action('create'));
         self::assertSame($builder, $builder->meta(['k' => 'v']));
+        self::assertSame($builder, $builder->routeSegment('test'));
     }
 }

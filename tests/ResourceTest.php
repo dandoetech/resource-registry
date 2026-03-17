@@ -191,5 +191,6 @@ final class ResourceTest extends TestCase
         self::assertSame([], $resource->getSortable());
         self::assertSame([], $resource->getSearchable());
         self::assertSame([], $resource->getMeta());
+        self::assertNull($resource->getRouteSegment());
     }
 }

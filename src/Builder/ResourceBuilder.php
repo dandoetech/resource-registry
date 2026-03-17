@@ -11,6 +11,7 @@ use DanDoeTech\ResourceRegistry\Definition\FieldType;
 use DanDoeTech\ResourceRegistry\Definition\RelationDefinition;
 use DanDoeTech\ResourceRegistry\Definition\RelationType;
 use DanDoeTech\ResourceRegistry\Definition\ResourceDefinition;
+use DanDoeTech\ResourceRegistry\Resource;
 
 final class ResourceBuilder
 {
@@ -49,6 +50,8 @@ final class ResourceBuilder
 
     /** @var array<string, mixed> */
     private array $meta = [];
+
+    private ?string $routeSegment = null;
 
     /** @var array<string, true> */
     private array $fieldNames = [];
@@ -349,6 +352,55 @@ final class ResourceBuilder
         return $this;
     }
 
+    public function routeSegment(string $segment): self
+    {
+        $this->routeSegment = $segment;
+
+        return $this;
+    }
+
+    /**
+     * Inherit fields, relations, computed fields, timestamps, and softDeletes
+     * from another Resource class. Call before overrides.
+     *
+     * @param class-string<Resource> $resourceClass
+     */
+    public function from(string $resourceClass): self
+    {
+        $base = new $resourceClass();
+
+        foreach ($base->getFields() as $field) {
+            if (!isset($this->fieldNames[$field->getName()])) {
+                $this->fieldNames[$field->getName()] = true;
+                /** @var FieldDefinition $field */
+                $this->fields[] = $field;
+            }
+        }
+
+        foreach ($base->getRelations() as $relation) {
+            if (!isset($this->relationNames[$relation->getName()])) {
+                $this->relationNames[$relation->getName()] = true;
+                /** @var RelationDefinition $relation */
+                $this->relations[] = $relation;
+            }
+        }
+
+        foreach ($base->getComputedFields() as $computed) {
+            /** @var ComputedFieldDefinition $computed */
+            $this->computedFields[] = $computed;
+        }
+
+        if ($base->isTimestamped()) {
+            $this->timestamps = true;
+        }
+
+        if ($base->usesSoftDeletes()) {
+            $this->softDeletes = true;
+        }
+
+        return $this;
+    }
+
     public function build(): ResourceDefinition
     {
         if ($this->key === null || $this->key === '') {
@@ -370,6 +422,7 @@ final class ResourceBuilder
             sortable: $this->sortable,
             searchable: $this->searchable,
             meta: $this->meta,
+            routeSegment: $this->routeSegment,
         );
     }
 

@@ -101,6 +101,11 @@ abstract class Resource implements ResourceDefinitionInterface
         return $this->resolve()->getMeta();
     }
 
+    public function getRouteSegment(): ?string
+    {
+        return $this->resolve()->getRouteSegment();
+    }
+
     private function resolve(): ResourceDefinition
     {
         if ($this->definition === null) {
