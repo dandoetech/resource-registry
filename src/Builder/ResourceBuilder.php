@@ -8,6 +8,7 @@ use DanDoeTech\ResourceRegistry\Definition\ActionDefinition;
 use DanDoeTech\ResourceRegistry\Definition\ComputedFieldDefinition;
 use DanDoeTech\ResourceRegistry\Definition\FieldDefinition;
 use DanDoeTech\ResourceRegistry\Definition\FieldType;
+use DanDoeTech\ResourceRegistry\Definition\QueryProfile;
 use DanDoeTech\ResourceRegistry\Definition\RelationDefinition;
 use DanDoeTech\ResourceRegistry\Definition\RelationType;
 use DanDoeTech\ResourceRegistry\Definition\ResourceDefinition;
@@ -52,6 +53,9 @@ final class ResourceBuilder
     private array $meta = [];
 
     private ?string $routeSegment = null;
+
+    /** @var array<string, QueryProfile> */
+    private array $queryProfiles = [];
 
     /** @var array<string, true> */
     private array $fieldNames = [];
@@ -360,6 +364,31 @@ final class ResourceBuilder
     }
 
     /**
+     * Define a named query profile with optional filter/sort overrides and pre-filters.
+     *
+     * @param list<string>|null    $filterable
+     * @param list<string>|null    $sortable
+     * @param array<string, mixed> $preFilter  Auto-applied WHERE conditions (exact match)
+     * @param list<string>|null    $searchable
+     */
+    public function queryProfile(
+        string $name,
+        ?array $filterable = null,
+        ?array $sortable = null,
+        array $preFilter = [],
+        ?array $searchable = null,
+    ): self {
+        $this->queryProfiles[$name] = new QueryProfile(
+            filterable: $filterable,
+            sortable: $sortable,
+            preFilter: $preFilter,
+            searchable: $searchable,
+        );
+
+        return $this;
+    }
+
+    /**
      * Inherit fields, relations, computed fields, timestamps, and softDeletes
      * from another Resource class. Call before overrides.
      *
@@ -423,6 +452,7 @@ final class ResourceBuilder
             searchable: $this->searchable,
             meta: $this->meta,
             routeSegment: $this->routeSegment,
+            queryProfiles: $this->queryProfiles,
         );
     }
 

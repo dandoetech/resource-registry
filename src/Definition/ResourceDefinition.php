@@ -22,6 +22,7 @@ final class ResourceDefinition implements ResourceDefinitionInterface
      * @param list<string>                  $sortable
      * @param list<string>                  $searchable
      * @param array<string, mixed>          $meta
+     * @param array<string, QueryProfile>   $queryProfiles
      */
     public function __construct(
         public string  $key,
@@ -39,6 +40,7 @@ final class ResourceDefinition implements ResourceDefinitionInterface
         public array   $searchable = [],
         public array   $meta = [],
         public ?string $routeSegment = null,
+        public array   $queryProfiles = [],
     ) {
     }
 
@@ -129,6 +131,12 @@ final class ResourceDefinition implements ResourceDefinitionInterface
     public function getMeta(): array
     {
         return $this->meta;
+    }
+
+    /** @return array<string, QueryProfile> */
+    public function getQueryProfiles(): array
+    {
+        return $this->queryProfiles;
     }
 
     public function getRouteSegment(): ?string

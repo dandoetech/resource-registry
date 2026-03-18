@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DanDoeTech\ResourceRegistry\Contracts;
 
+use DanDoeTech\ResourceRegistry\Definition\QueryProfile;
+
 interface ResourceDefinitionInterface
 {
     public function getKey(): string;
@@ -43,6 +45,9 @@ interface ResourceDefinitionInterface
 
     /** @return array<string, mixed> */
     public function getMeta(): array;
+
+    /** @return array<string, QueryProfile> */
+    public function getQueryProfiles(): array;
 
     public function getRouteSegment(): ?string;
 }

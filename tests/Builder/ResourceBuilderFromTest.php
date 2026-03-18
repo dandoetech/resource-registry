@@ -24,7 +24,8 @@ final class BaseTestResource extends Resource
             ->computed('total', FieldType::Float, via: 'sum:items.price')
             ->filterable(['name', 'price'])
             ->sortable(['name'])
-            ->action('create');
+            ->action('create')
+            ->queryProfile('admin', filterable: ['name', 'price'], sortable: ['name']);
     }
 }
 
@@ -98,6 +99,20 @@ final class ResourceBuilderFromTest extends TestCase
         self::assertSame([], $resource->getFilterable());
         self::assertSame([], $resource->getSortable());
         self::assertSame([], $resource->getActions());
+    }
+
+    public function testFromDoesNotCopyQueryProfiles(): void
+    {
+        // BaseTestResource has a 'admin' query profile
+        $base = new BaseTestResource();
+        self::assertCount(1, $base->getQueryProfiles());
+
+        $resource = (new ResourceBuilder())
+            ->key('child')
+            ->from(BaseTestResource::class)
+            ->build();
+
+        self::assertSame([], $resource->getQueryProfiles());
     }
 
     public function testFromAllowsOverrideAfterCopy(): void

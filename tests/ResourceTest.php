@@ -7,6 +7,7 @@ namespace DanDoeTech\ResourceRegistry\Tests;
 use DanDoeTech\ResourceRegistry\Builder\ResourceBuilder;
 use DanDoeTech\ResourceRegistry\Contracts\ResourceDefinitionInterface;
 use DanDoeTech\ResourceRegistry\Definition\FieldType;
+use DanDoeTech\ResourceRegistry\Definition\QueryProfile;
 use DanDoeTech\ResourceRegistry\Definition\RelationType;
 use DanDoeTech\ResourceRegistry\Resource;
 use PHPUnit\Framework\TestCase;
@@ -39,7 +40,9 @@ final class TestProductResource extends Resource
             ->action('create')
             ->action('update')
             ->action('delete')
-            ->meta(['icon' => 'box']);
+            ->meta(['icon' => 'box'])
+            ->queryProfile('active', preFilter: ['status' => 'active'])
+            ->queryProfile('cheap', filterable: ['name'], preFilter: ['price' => 50]);
     }
 }
 
@@ -171,6 +174,31 @@ final class ResourceTest extends TestCase
         self::assertSame(['name', 'price', 'category_name'], $resource->getFilterable());
         self::assertSame(['name', 'price', 'orders_count'], $resource->getSortable());
         self::assertSame(['name'], $resource->getSearchable());
+    }
+
+    public function testQueryProfilesAvailableViaInterface(): void
+    {
+        $resource = new TestProductResource();
+
+        $profiles = $resource->getQueryProfiles();
+        self::assertCount(2, $profiles);
+        self::assertArrayHasKey('active', $profiles);
+        self::assertArrayHasKey('cheap', $profiles);
+
+        self::assertInstanceOf(QueryProfile::class, $profiles['active']);
+        self::assertSame(['status' => 'active'], $profiles['active']->preFilter);
+        self::assertNull($profiles['active']->filterable);
+
+        self::assertInstanceOf(QueryProfile::class, $profiles['cheap']);
+        self::assertSame(['name'], $profiles['cheap']->filterable);
+        self::assertSame(['price' => 50], $profiles['cheap']->preFilter);
+    }
+
+    public function testMinimalResourceHasEmptyQueryProfiles(): void
+    {
+        $resource = new TestMinimalResource();
+
+        self::assertSame([], $resource->getQueryProfiles());
     }
 
     public function testMinimalResourceDefaultsVersionToOne(): void

@@ -6,6 +6,7 @@ namespace DanDoeTech\ResourceRegistry\Tests\Builder;
 
 use DanDoeTech\ResourceRegistry\Builder\ResourceBuilder;
 use DanDoeTech\ResourceRegistry\Definition\FieldType;
+use DanDoeTech\ResourceRegistry\Definition\QueryProfile;
 use DanDoeTech\ResourceRegistry\Definition\RelationType;
 use DanDoeTech\ResourceRegistry\Definition\ResourceDefinition;
 use PHPUnit\Framework\TestCase;
@@ -397,5 +398,64 @@ final class ResourceBuilderTest extends TestCase
         self::assertSame($builder, $builder->action('create'));
         self::assertSame($builder, $builder->meta(['k' => 'v']));
         self::assertSame($builder, $builder->routeSegment('test'));
+        self::assertSame($builder, $builder->queryProfile('admin', filterable: ['a']));
+    }
+
+    public function testQueryProfileDefinedOnBuilder(): void
+    {
+        $resource = (new ResourceBuilder())
+            ->key('product')
+            ->queryProfile('admin', filterable: ['name', 'price'], sortable: ['name'])
+            ->build();
+
+        $profiles = $resource->getQueryProfiles();
+        self::assertCount(1, $profiles);
+        self::assertArrayHasKey('admin', $profiles);
+        self::assertInstanceOf(QueryProfile::class, $profiles['admin']);
+        self::assertSame(['name', 'price'], $profiles['admin']->filterable);
+        self::assertSame(['name'], $profiles['admin']->sortable);
+        self::assertNull($profiles['admin']->searchable);
+        self::assertSame([], $profiles['admin']->preFilter);
+    }
+
+    public function testQueryProfileWithPreFilter(): void
+    {
+        $resource = (new ResourceBuilder())
+            ->key('product')
+            ->queryProfile('active', preFilter: ['status' => 'active'])
+            ->build();
+
+        $profiles = $resource->getQueryProfiles();
+        self::assertCount(1, $profiles);
+        self::assertArrayHasKey('active', $profiles);
+        self::assertSame(['status' => 'active'], $profiles['active']->preFilter);
+        self::assertNull($profiles['active']->filterable);
+        self::assertNull($profiles['active']->sortable);
+    }
+
+    public function testMultipleQueryProfiles(): void
+    {
+        $resource = (new ResourceBuilder())
+            ->key('product')
+            ->queryProfile('admin', filterable: ['name', 'price', 'status'], sortable: ['name', 'price'])
+            ->queryProfile('active', preFilter: ['status' => 'active'], searchable: ['name'])
+            ->build();
+
+        $profiles = $resource->getQueryProfiles();
+        self::assertCount(2, $profiles);
+        self::assertArrayHasKey('admin', $profiles);
+        self::assertArrayHasKey('active', $profiles);
+        self::assertSame(['name', 'price', 'status'], $profiles['admin']->filterable);
+        self::assertSame(['status' => 'active'], $profiles['active']->preFilter);
+        self::assertSame(['name'], $profiles['active']->searchable);
+    }
+
+    public function testBuildMinimalResourceHasEmptyQueryProfiles(): void
+    {
+        $resource = (new ResourceBuilder())
+            ->key('product')
+            ->build();
+
+        self::assertSame([], $resource->getQueryProfiles());
     }
 }

@@ -10,6 +10,7 @@ use DanDoeTech\ResourceRegistry\Contracts\ComputedFieldDefinitionInterface;
 use DanDoeTech\ResourceRegistry\Contracts\FieldDefinitionInterface;
 use DanDoeTech\ResourceRegistry\Contracts\RelationDefinitionInterface;
 use DanDoeTech\ResourceRegistry\Contracts\ResourceDefinitionInterface;
+use DanDoeTech\ResourceRegistry\Definition\QueryProfile;
 use DanDoeTech\ResourceRegistry\Definition\ResourceDefinition;
 
 abstract class Resource implements ResourceDefinitionInterface
@@ -99,6 +100,12 @@ abstract class Resource implements ResourceDefinitionInterface
     public function getMeta(): array
     {
         return $this->resolve()->getMeta();
+    }
+
+    /** @return array<string, QueryProfile> */
+    public function getQueryProfiles(): array
+    {
+        return $this->resolve()->getQueryProfiles();
     }
 
     public function getRouteSegment(): ?string
