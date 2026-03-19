@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Extended `FieldType` enum with `Date`, `Text`, `Email`, `Url`, `Enum` cases
+- `ResourceBuilder::from()` for resource inheritance (copy fields, relations, actions from another resource)
+- `ResourceBuilder::routeSegment()` for custom URL path segments (e.g., `order-items` instead of `order_item`)
+- `ResourceBuilder::queryProfile()` with `preFilter` support for named query profiles on the resource class
+- `QueryProfile` value object with filterable, sortable, searchable overrides and auto-applied pre-filter conditions
+- `getHandler(): ?string` on `ActionDefinitionInterface` for custom action handler class references
+- `getQueryProfiles(): array` on `ResourceDefinitionInterface` for resource-level query profiles
+- `getRouteSegment(): ?string` on `ResourceDefinitionInterface` for custom URL path segments
+
 ## [0.1.0] - 2026-03-15
 
 ### Added

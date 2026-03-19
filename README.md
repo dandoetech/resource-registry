@@ -89,7 +89,7 @@ All consumer packages type against these interfaces, never concrete classes.
 
 | Enum | Values |
 |---|---|
-| `FieldType` | `String`, `Integer`, `Float`, `Boolean`, `DateTime`, `Json` |
+| `FieldType` | `String`, `Integer`, `Float`, `Boolean`, `DateTime`, `Json`, `Date`, `Text`, `Email`, `Url`, `Enum` |
 | `RelationType` | `BelongsTo`, `HasOne`, `HasMany`, `BelongsToMany`, `HasManyThrough`, `HasOneThrough`, `MorphTo`, `MorphMany` |
 
 ### Core Classes
