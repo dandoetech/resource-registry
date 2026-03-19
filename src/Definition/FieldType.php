@@ -12,4 +12,9 @@ enum FieldType: string
     case Boolean = 'boolean';
     case DateTime = 'datetime';
     case Json = 'json';
+    case Date = 'date';
+    case Text = 'text';
+    case Email = 'email';
+    case Url = 'url';
+    case Enum = 'enum';
 }
