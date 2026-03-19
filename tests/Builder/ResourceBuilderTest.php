@@ -316,6 +316,53 @@ final class ResourceBuilderTest extends TestCase
         self::assertSame('cancel', $action->getName());
         self::assertSame('Cancel this order', $action->getDescription());
         self::assertSame(['confirm' => true], $action->getMeta());
+        self::assertNull($action->getHandler());
+    }
+
+    public function testActionWithHandlerClass(): void
+    {
+        $resource = (new ResourceBuilder())
+            ->key('order')
+            ->action('activate', handler: 'App\\Actions\\ActivateHandler')
+            ->build();
+
+        self::assertCount(1, $resource->getActions());
+        $action = $resource->getActions()[0];
+        self::assertSame('activate', $action->getName());
+        self::assertSame('App\\Actions\\ActivateHandler', $action->getHandler());
+    }
+
+    public function testActionWithoutHandlerIsNull(): void
+    {
+        $resource = (new ResourceBuilder())
+            ->key('product')
+            ->action('create')
+            ->action('update')
+            ->action('delete')
+            ->build();
+
+        foreach ($resource->getActions() as $action) {
+            self::assertNull($action->getHandler(), "CRUD action '{$action->getName()}' should have null handler");
+        }
+    }
+
+    public function testActionWithHandlerAndAllProperties(): void
+    {
+        $resource = (new ResourceBuilder())
+            ->key('deployment')
+            ->action(
+                'deploy',
+                description: 'Deploy to production',
+                meta: ['confirm' => true, 'icon' => 'rocket'],
+                handler: 'App\\Actions\\DeployHandler',
+            )
+            ->build();
+
+        $action = $resource->getActions()[0];
+        self::assertSame('deploy', $action->getName());
+        self::assertSame('Deploy to production', $action->getDescription());
+        self::assertSame(['confirm' => true, 'icon' => 'rocket'], $action->getMeta());
+        self::assertSame('App\\Actions\\DeployHandler', $action->getHandler());
     }
 
     public function testLabelDefaultsToUcwordsKey(): void

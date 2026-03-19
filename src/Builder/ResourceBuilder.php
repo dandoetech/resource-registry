@@ -334,13 +334,15 @@ final class ResourceBuilder
 
     /**
      * @param array<string, mixed> $meta
+     * @param ?string              $handler Class-string of action handler for custom actions (null for CRUD)
      */
-    public function action(string $name, ?string $description = null, array $meta = []): self
+    public function action(string $name, ?string $description = null, array $meta = [], ?string $handler = null): self
     {
         $this->actions[] = new ActionDefinition(
             name: $name,
             description: $description,
             meta: $meta,
+            handler: $handler,
         );
 
         return $this;

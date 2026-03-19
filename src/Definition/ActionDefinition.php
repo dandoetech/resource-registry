@@ -10,11 +10,13 @@ final class ActionDefinition implements ActionDefinitionInterface
 {
     /**
      * @param array<string, mixed> $meta
+     * @param ?string              $handler Class-string of action handler for custom actions (null for CRUD)
      */
     public function __construct(
         public string  $name,
         public ?string $description = null,
         public array   $meta = [],
+        public ?string $handler = null,
     ) {
     }
 
@@ -32,5 +34,10 @@ final class ActionDefinition implements ActionDefinitionInterface
     public function getMeta(): array
     {
         return $this->meta;
+    }
+
+    public function getHandler(): ?string
+    {
+        return $this->handler;
     }
 }

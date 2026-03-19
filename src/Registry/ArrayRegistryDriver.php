@@ -233,6 +233,7 @@ final class ArrayRegistryDriver implements RegistryDriverInterface
             name: $name,
             description: \is_string($a['description'] ?? null) ? $a['description'] : null,
             meta: $this->toStringKeyedArray($a['meta'] ?? []),
+            handler: \is_string($a['handler'] ?? null) ? $a['handler'] : null,
         );
     }
 
