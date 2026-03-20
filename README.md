@@ -1,5 +1,7 @@
 # DanDoeTech Resource Registry
 
+> **Pre-release** — Architecture by senior tech lead, implementation largely AI-assisted with human review. Not fully reviewed. Architecture may change before v1.0.0.
+
 Framework-agnostic resource definition layer for PHP. Define your API resources once — fields, relations, actions, computed fields — and let consumer packages (OpenAPI, BFF, generic API) derive everything else.
 
 ## Installation
